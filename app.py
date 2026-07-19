@@ -75,6 +75,10 @@ dec_model = load_model(
     compile=False
 )
 
+# Ambil centroid dari ClusteringLayer
+clustering_layer = dec_model.get_layer(index=-1)
+centroids = clustering_layer.get_weights()[0]
+
 mapping = {
 
     0: {
@@ -117,12 +121,29 @@ def home():
 @app.post("/predict")
 def predict(data: Gempa):
 
+    # ==========================
+    # Input
+    # ==========================
     X = np.array([
         [data.magnitudo, data.kedalaman]
     ])
 
+    # ==========================
+    # Normalisasi
+    # ==========================
     X_scaled = scaler.transform(X)
 
+    # ==========================
+    # Encoder
+    # ==========================
+    latent = encoder.predict(
+        X_scaled,
+        verbose=0
+    )
+
+    # ==========================
+    # DEC Prediction
+    # ==========================
     q = dec_model.predict(
         X_scaled,
         verbose=0
@@ -131,8 +152,41 @@ def predict(data: Gempa):
     cluster = int(np.argmax(q))
 
     return {
+
+        "input": {
+            "magnitudo": float(data.magnitudo),
+            "kedalaman": float(data.kedalaman)
+        },
+
+        "normalized": {
+            "magnitudo": float(X_scaled[0][0]),
+            "kedalaman": float(X_scaled[0][1])
+        },
+
+        "latent": [
+            float(v)
+            for v in latent[0]
+        ],
+
+        "centroids": [
+            [
+                float(x)
+                for x in row
+            ]
+            for row in centroids
+        ],
+
+        "probability": [
+            float(v)
+            for v in q[0]
+        ],
+
         "cluster": cluster,
+
         "label": mapping[cluster]["label"],
+
         "status": mapping[cluster]["status"],
+
         "color": mapping[cluster]["color"]
+
     }
