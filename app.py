@@ -82,9 +82,9 @@ centroids = clustering_layer.get_weights()[0]
 mapping = {
 
     0: {
-        "label": "Risiko Rendah",
-        "status": "AMAN",
-        "color": "#22C55E"
+        "label": "Risiko Tinggi",
+        "status": "SIAGA",
+        "color": "#EF4444"
     },
 
     1: {
@@ -94,9 +94,9 @@ mapping = {
     },
 
     2: {
-        "label": "Risiko Tinggi",
-        "status": "SIAGA",
-        "color": "#EF4444"
+        "label": "Risiko Rendah",
+        "status": "AMAN",
+        "color": "#22C55E"
     }
 
 }
